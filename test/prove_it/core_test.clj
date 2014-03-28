@@ -1,7 +1,8 @@
 (ns prove-it.core-test
-  (:require [clojure.test :refer :all]
-            [prove-it.core :refer :all]))
+  (:require [midje.sweet :refer :all]
+            [instaparse.core :as insta]
+            [prove-it.core :refer :as p]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(facts :expression
+  (fact
+    (second (p/expression->tree "A OR B")) => truthy))

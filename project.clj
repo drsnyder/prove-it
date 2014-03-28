@@ -6,4 +6,5 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [com.cemerick/pomegranate "0.3.0"]
                  [instaparse "1.3.0"]]
-  :profiles {:dev  {:source-paths  ["dev"]}})
+  :profiles {:dev  {:source-paths ["dev"]
+                    :dependencies  [[midje "1.6.3"]]}})
