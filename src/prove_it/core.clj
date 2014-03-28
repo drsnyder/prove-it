@@ -1,5 +1,6 @@
 (ns prove-it.core
-  (:require [instaparse.core :as insta]))
+  (:require [instaparse.core :as insta]
+            [clojure.math.combinatorics :as combo]))
 
 (def logic-expression
   (insta/parser
@@ -11,6 +12,22 @@
      <term> = var | <'('> l-sub <')'> | l-sub
      var = #'[a-zA-Z]+'"))
 
+(def operators #{:or :and :not})
+
+(defn tree->tokens
+  ([tree acc]
+  (let [expr (first tree)]
+    (cond
+      (= expr :expr) (tree->tokens (second tree))
+      (operators expr) (concat acc (flatten (map tree->tokens (subvec tree 1))))
+      :else (first (subvec tree 1)))))
+  ([tree]
+   (tree->tokens tree (list))))
+
+(defn table-inputs
+  [vars]
+  (let [nvars (count vars)]
+    (map #(zipmap vars %) (apply combo/cartesian-product (take nvars (cycle [[true false]]))))))
 
 (defn lookup
   [value-map s]
