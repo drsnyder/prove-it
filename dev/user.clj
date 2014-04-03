@@ -10,4 +10,4 @@
 (p/logic-expression "A OR NOT (B AND C)")
 (p/logic-expression "NOT A OR NOT (B AND C)")
 
-(def value-map {:var {"A" false "B" true "C" false}})
+(def value-map {"A" false "B" true "C" false})
