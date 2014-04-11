@@ -11,6 +11,14 @@ Are these expressions equal?
   (p/equal? "A -> B" "NOT A OR B")
   => true
 
+Is the following argument valid?
+
+  ; (p/valid? conclusion & propositions)
+  (p/valid? "NOT (S AND E)" "S OR E" "S -> H" "E -> NOT H")
+  => true
+  (p/valid? "W <-> P" "W <-> (P AND C)" "NOT C")
+  => false
+
 ## License
 
 Copyright © 2014 Damon Snyder

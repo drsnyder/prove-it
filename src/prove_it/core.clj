@@ -1,5 +1,6 @@
 (ns prove-it.core
   (:require [instaparse.core :as insta]
+            [clojure.set :refer :all]
             [clojure.math.combinatorics :as combo]))
 
 ; FIXME move to a resource as logic-expression.bnf
@@ -102,17 +103,17 @@
 
 (defn truth-table-contradiction?
   [conclusion & propositions]
-  (and (reduce logical-and propositions) (not conclusion)))
+  (when (reduce logical-and propositions)
+    conclusion))
 
 (defn valid?
   [conclusion & propositions]
-  (let [tokens (apply clojure.set/union (map #(tree->tokens (logic-expression %)) (conj propositions conclusion)))
+  (let [tokens (apply union (map #(tree->tokens (logic-expression %)) (conj propositions conclusion)))
         inputs (table-inputs tokens)
         propositions-evaluated (map (fn [truth-table-row] (map #(evaluate % truth-table-row) propositions)) inputs)
         conclusion-evaluated (map (fn [truth-table-row] (evaluate conclusion truth-table-row)) inputs)]
-    (clojure.pprint/pprint propositions-evaluated)
-    (clojure.pprint/pprint conclusion-evaluated)
-    (map #(apply truth-table-contradiction? %) (map vector conclusion-evaluated propositions-evaluated))
-    )
-  )
+    ;(println (map vector conclusion-evaluated propositions-evaluated))
+    (not (some false?
+               (map #(apply truth-table-contradiction? (first %) (second %))
+                    (map vector conclusion-evaluated propositions-evaluated))))))
 
