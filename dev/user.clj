@@ -1,6 +1,7 @@
 (ns user
   (:require [instaparse.core :as insta]
             [prove-it.core :as p]
+            [prove-it.expression :as e]
             [midje.repl :refer :all]))
 
 
