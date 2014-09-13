@@ -12,4 +12,4 @@
 (facts :tree :tokens
   (p/tree->tokens nil) => (throws java.lang.AssertionError)
   (p/tree->tokens []) => (throws java.lang.AssertionError)
-  (p/tree->tokens [:var :a]) => :a)
+  (p/tree->tokens [:var :a]) => (set [:a]))

@@ -4,15 +4,16 @@
             [clojure.math.combinatorics :as combo]))
 
 ; FIXME move to a resource as logic-expression.bnf
+; FIXME how do we handle precedence?
 (def logic-expression
   (insta/parser
     "expr = l-sub
      <l-sub> = or | and | impl | bicond | not | term
+     not = <'NOT '> term | <'not '> term
      or = l-sub <' OR '>  term | l-sub <' or '> term
      and = l-sub <' AND '> term | l-sub <' and '> term
      impl = l-sub <' -> '> term
      bicond = l-sub <' <-> '> term
-     not = <'NOT '> term | <'not '> term
      <term> = var | <'('> l-sub <')'> | l-sub
      var = #'[a-zA-Z]+'"))
 
@@ -47,10 +48,18 @@
   [var-map op-map]
   (merge {:var var-map} op-map))
 
-(defn expression->tree
+(defmulti expression->tree class)
+
+(defmethod expression->tree String
   [expression]
   (logic-expression expression))
 
+(defmethod expression->tree clojure.lang.PersistentVector
+  [expression]
+  expression)
+
+; FIXME: this can be collapsed into a single function now that expression->tree
+; handles the dispatch based on the expression given
 (defmulti evaluate (fn [i value-map] (class i)))
 
 (defmethod evaluate clojure.lang.PersistentVector [tree value-map]
@@ -87,15 +96,16 @@
 
 (defn truth-table
   [expr]
-  (let [evaluated (logic-expression expr)]
+  (let [evaluated (expression->tree expr)]
     (into {} (for [k (table-inputs (tree->tokens evaluated))]
                [k (evaluate evaluated k)]))))
 
+
 (defn equal?
   [a b]
-  (let [tree-a (logic-expression a)
+  (let [tree-a (expression->tree a)
         a-tokens (tree->tokens tree-a)
-        tree-b (logic-expression b)
+        tree-b (expression->tree b)
         b-tokens (tree->tokens tree-b)
         _ (assert (= a-tokens b-tokens) (str "Error, expressions cannot be compared: " a-tokens " " b-tokens))
         inputs (table-inputs a-tokens)]
@@ -108,7 +118,7 @@
 
 (defn valid?
   [conclusion & propositions]
-  (let [tokens (apply union (map #(tree->tokens (logic-expression %)) (conj propositions conclusion)))
+  (let [tokens (apply union (map #(tree->tokens (expression->tree %)) (conj propositions conclusion)))
         inputs (table-inputs tokens)
         propositions-evaluated (map (fn [truth-table-row] (map #(evaluate % truth-table-row) propositions)) inputs)
         conclusion-evaluated (map (fn [truth-table-row] (evaluate conclusion truth-table-row)) inputs)]

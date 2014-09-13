@@ -1,36 +1,65 @@
 (ns prove-it.expression)
 
 (defn expression
-  [&[syms]]
-  [:expr syms])
+  [& syms]
+  (vec (concat [:expr] syms)))
 
-(declare make-var)
+(declare make-node)
 
 (defn implies
   [a b]
-  [:implies (make-var a) (make-var b)])
+  [:impl (make-node a) (make-node b)])
+
+(defn or*
+  [a b]
+  [:or (make-node a) (make-node b)])
 
 (defn and*
   [a b]
-  [:and (make-var a) (make-var b)])
+  [:and (make-node a) (make-node b)])
+
+(defn not*
+  [a]
+  [:not (make-node a)])
+
+(defn biconditional
+  [a b]
+  [:bicond (make-node a) (make-node b)])
 
 (declare lhs)
 (declare rhs)
-(declare paren-wrap)
+(declare single)
+(declare wrap)
 
 (defmulti node->string first)
 
-(defmethod node->string :implies
+(defmethod node->string :impl
   [e]
-  (paren-wrap (str (lhs e) " -> " (rhs e))))
+  (wrap (str (lhs e) " -> " (rhs e))))
+
+(defmethod node->string :bicond
+  [e]
+  (wrap (str (lhs e) " <-> " (rhs e))))
 
 (defmethod node->string :and
   [e]
-  (paren-wrap (str (lhs e) " AND " (rhs e))))
+  (wrap (str (lhs e) " AND " (rhs e))))
+
+(defmethod node->string :or
+  [e]
+  (wrap (str (lhs e) " OR " (rhs e))))
+
+(defmethod node->string :not
+  [e]
+  (wrap (str "NOT " (single e))))
 
 (defmethod node->string :var
   [e]
   (str (second e)))
+
+(defn single
+  [e]
+  (node->string (first (rest e))))
 
 (defn lhs
   [e]
@@ -56,20 +85,20 @@
   [n]
   (and (sequential? n) (not (var-node? n))))
 
-(defmulti make-var class)
+(defmulti make-node class)
 
-(defmethod make-var String
+(defmethod make-node String
   [v]
   (var-node v))
 
-(defmethod make-var clojure.lang.Symbol
+(defmethod make-node clojure.lang.Symbol
   [v]
   (var-node v))
 
-(defmethod make-var :default
+(defmethod make-node :default
   [v]
   v)
 
-(defn paren-wrap
+(defn wrap
   [e]
   (str "(" e ")"))
