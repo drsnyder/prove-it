@@ -6,31 +6,36 @@ A repl for logical statements.
 
 To load into your namespace:
 
-    (:require (prove-it [core :as p])
-		                    [expression :as e]))
-
+```clojure
+(:require (prove-it [core :as p]
+                    [expression :as e]))
+```
 
 Some examples. Are these expressions equal?
     
-    (p/equal? "A -> B" "(NOT A) OR B") => true
-
+```clojure
+(p/equal? "A -> B" "(NOT A) OR B") => true
+```
 
 Is the following argument valid?
 
-    ; (p/valid? conclusion & propositions)
-    (p/valid? "NOT (S AND E)" "S OR E" "S -> H" "E -> NOT H") => true
-    (p/valid? "W <-> P" "W <-> (P AND C)" "NOT C") => false
-
+```clojure
+; (p/valid? conclusion & propositions)
+(p/valid? "NOT (S AND E)" "S OR E" "S -> H" "E -> NOT H") => true
+(p/valid? "W <-> P" "W <-> (P AND C)" "NOT C") => false
+```
 
 Generate an expression tree using s-expressions:
 
-    (e/expression (e/implies “A” “B”)) => [:expr [:impl [:var “A”] [:var “B”]]]
-
+```clojure
+(e/expression (e/implies “A” “B”)) => [:expr [:impl [:var “A”] [:var “B”]]]
+```
 
 Construct an expression using s-expressions and compare that with a string.
 
-    (p/equal? (p/logic-expression “A -> B”) (e/expression (e/implies “A” “B”))) => true
-
+```clojure
+(p/equal? (p/logic-expression “A -> B”) (e/expression (e/implies “A” “B”))) => true
+```
 
 ## License
 
